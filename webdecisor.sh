@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+#Váriavel do tipo do servidor
+TipoServidor=`hostname | cut -b 1-9`
+
 echo "########################################################"
 echo " 		    Iniciando Procedimentos                   "
 echo "########################################################"
@@ -86,6 +89,29 @@ psql -X -h $END_SERVIDOR -U postgres -d $CHINCHILA_DS_DATABASENAME --command="$G
 service postgresql-$PG_VERSION reload
 
 psql -X -h $END_SERVIDOR -U "webdecisor" -d $CHINCHILA_DS_DATABASENAME --password --command="$QueryTeste"
+
+if [ $TipoServidor == "localhost" ]; then
+        echo "#######################################################"
+	echo ""
+  	echo "O servidor dessa loja é físico, não é necessário "
+	echo "realizar a liberação do firewall."
+        echo "#######################################################"
+
+
+
+else
+        echo "#######################################################"
+	echo ""
+	echo "O servidor dessa loja é em nuvem, seguir os passos do  "
+        echo " 	  KB http://kb.a7.net.br/index.php?curid=9470"
+        echo "#######################################################"
+
+	echo ""
+	echo Pressione qualquer tecla para prosseguir!	
+	read ciente
+ 
+
+fi
 
 echo " "
 echo "########################################################"
