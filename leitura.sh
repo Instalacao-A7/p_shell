@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
+# Exemplo de estrutura if no Shell script
+
+# Variável de exemplo
+TipoServidor=`hostname | cut -b 1-9`
 
 echo "########################################################"
 echo " 		    Iniciando Procedimentos                   "
@@ -73,6 +77,30 @@ service postgresql-$PG_VERSION reload
 
 psql -X -h $END_SERVIDOR -U "$user" -d $CHINCHILA_DS_DATABASENAME --password --command="$QueryTeste"
 
+#/ Condição no if
+if [ $TipoServidor == "localhost" ]; then
+        echo "#######################################################"
+	echo ""
+  	echo "O servidor dessa loja é físico, não é necessário "
+	echo "realizar a liberação do firewall."
+        echo "#######################################################"
+
+
+
+else
+        echo "#######################################################"
+	echo ""
+	echo "O servidor dessa loja é em nuvem, seguir os passos do  "
+        echo " 	  KB http://kb.a7.net.br/index.php?curid=9470"
+        echo "#######################################################"
+
+	echo ""
+	echo Pressione qualquer tecla para prosseguir!	
+	read ciente
+ 
+
+fi
+
 echo " "
 echo "########################################################"
 echo " "
@@ -114,4 +142,6 @@ echo
 	echo "                         OK                            "
 	echo "Copie os 'Dados de acesso' e encaminhe ao solicitante. "
 	echo "#######################################################"
+	echo ""
+	echo ""
  fi
