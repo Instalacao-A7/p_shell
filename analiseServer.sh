@@ -1,21 +1,26 @@
 #!/usr/bin/env bash
 
-
+#Variávies:
 ram=`free -h | head -n 2 |tail -n 1 |cut -b 15-16`
+
 cpu=`lshw -c cpu | head -n 2 | tail -n 1 | cut -c 17-`
+
 disk=`sudo fdisk -l | grep -i "disk /dev"`
+
 veros=`cat /etc/redhat-release`
-#parSda=`sudo fdisk -l | grep -i "disk /dev" | head -n 1 | tail -n 1 | cut -b 15-19`
+
 parSda=`sudo fdisk -l | grep -i "disk /dev" | head -n 1 | tail -n 1 | cut -d ":" -f 2 | cut -d "." -f 1`
-#parRoot=`sudo fdisk -l | grep -i "disk /dev" | head -n 2 | tail -n 1 | cut -b 30-33`
+
 parRoot=`sudo fdisk -l | grep -i "root" | head -n 1 | tail -n 1 | cut -d ":" -f 2 | cut -d "." -f 1`
-#parSwp=`sudo fdisk -l | grep -i "disk /dev" | head -n 3 | tail -n 1 | cut -b 30-34`
+
 parSwp=`sudo fdisk -l | grep -i "swap" | head -n 1 | tail -n 1 | cut -d ":" -f 2 | cut -d "M" -f 1`
+
 versionOs=`cat /etc/redhat-release | cut -b 22-24`
+
 erroMemoria=`cd /usr/wildfly/bin && ls | grep "hs_err" | head -n 1 | tail -n 1 | cut -b 1-15`
 
 
-
+#Impressão no terminal:
 echo "-------------------------------------- Memoria RAM ------------------------------------"
 echo ""
 if [ $ram -lt 7 ]; then
