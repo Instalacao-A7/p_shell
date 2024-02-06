@@ -24,7 +24,7 @@ diretorioArquivosEstilo = "/home/alpha7/chinchila-online-arquivos"
 print(AZUL + "Criando diretórios...." + RESET)
 if not os.path.exists(diretorioArquivoImpressao):
     os.makedirs(diretorioArquivoImpressao)
-caminho_arquivo_imp = os.path.join(diretorioArquivoImpressao, "imprimeEtiquetaAtendimento.txt")
+caminho_arquivo_imp = os.path.join(diretorioArquivoImpressao, "imprimeEtiquetaAtendimento")
 
 #Crio o diretório, caso não exista, onde serão colocados os arquivos de estilo
 #diretorioArquivosEstilo = "/home/alpha7/MEGA/Python/chinchila-online-arquivos"
