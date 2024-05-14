@@ -1,5 +1,5 @@
 #!/bin/bash
-
+# Criado por Kivya Pottechi
 # Função para formatar CNPJ com pontuações
 formatar_cnpj() {
     cnpj=$1
