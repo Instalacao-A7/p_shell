@@ -1,30 +1,39 @@
 #!/bin/bash
 # Criado por Kivya Pottechi
+
 # Função para formatar CNPJ com pontuações
 formatar_cnpj() {
-    cnpj=$1
-    # Remover todos os caracteres não numéricos
-    cnpj=$(echo "$cnpj" | tr -dc '0-9')
+    # Capturar o CNPJ da área de transferência
+    cnpj_selecionado=$(xclip -selection clipboard -o)
+    
+    # Inicializar variável para armazenar o CNPJ formatado
+    cnpj_formatado=""
+
+    # Percorrer cada caractere do CNPJ
+    for ((i=0; i<${#cnpj_selecionado}; i++)); do
+        char="${cnpj_selecionado:$i:1}"
+        # Verificar se o caractere é um dígito numérico
+        if [[ "$char" =~ [0-9] ]]; then
+            cnpj_formatado+="$char"
+        fi
+    done
+
     # Verificar se o CNPJ tem 14 dígitos
-    if [ ${#cnpj} -ne 14 ]; then
-        return 1
+    if [ ${#cnpj_formatado} -ne 14 ]; then
+        zenity --error --text="Nenhum CNPJ válido foi encontrado na área de transferência.\n\nConteúdo copiado: $cnpj_selecionado"
+        exit 1
     fi
+
     # Adicionar pontuações
-    cnpj_formatado=$(echo "$cnpj" | sed 's/\([0-9]\{2\}\)\([0-9]\{3\}\)\([0-9]\{3\}\)\([0-9]\{4\}\)\([0-9]\{2\}\)/\1.\2.\3\/\4-\5/')
+    cnpj_formatado="${cnpj_formatado:0:2}.${cnpj_formatado:2:3}.${cnpj_formatado:5:3}/${cnpj_formatado:8:4}-${cnpj_formatado:12:2}"
     echo "$cnpj_formatado"
 }
 
-# Capturar o CNPJ da área de transferência
-cnpj_selecionado=$(xclip -selection clipboard -o)
+# Chamar a função de formatação do CNPJ
+cnpj_formatado=$(formatar_cnpj)
 
-# Chamar a função de formatação com o CNPJ selecionado
-cnpj_formatado=$(formatar_cnpj "$cnpj_selecionado")
-
-# Verificar se a formatação do CNPJ foi bem-sucedida
-if [ $? -ne 0 ]; then
-    zenity --error --text="Nenhum CNPJ válido foi encontrado na área de transferência.\n\nConteúdo copiado: $cnpj_selecionado"
-    exit 1
-fi
+# Colar o CNPJ formatado na área de transferência
+echo -n "$cnpj_formatado" | xclip -selection clipboard
 
 # Simular a digitação do CNPJ formatado usando xdotool
-xdotool type --delay 100 --clearmodifiers " $cnpj_formatado"
+xdotool type --delay 100 " $cnpj_formatado"
