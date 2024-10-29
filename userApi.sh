@@ -80,25 +80,30 @@ psql -X -h $END_SERVIDOR -U "$user" -d $CHINCHILA_DS_DATABASENAME --password --c
 
 if [ $TipoServidor == "localhost" ]; then
         echo "#######################################################"
-	echo ""
-  	echo "O servidor dessa loja é físico, não é necessário "
-	echo "realizar a liberação do firewall."
+        echo ""
+        echo "O servidor dessa loja é físico, não é necessário "
+        echo "realizar a liberação do firewall."
         echo "#######################################################"
-
-
-
 else
         echo "#######################################################"
-	echo ""
-	echo "O servidor dessa loja é em nuvem, seguir os passos do  "
+        echo ""
+        echo "O servidor dessa loja é em nuvem, seguir os passos do  "
         echo " 	  KB http://kb.a7.net.br/index.php?curid=9470"
         echo "#######################################################"
-
-	echo ""
-	echo Pressione qualquer tecla para prosseguir!	
-	read ciente
- 
-
+		echo ""
+        # Captura o IP externo da rede usando curl ifconfig.me
+        END_SERVIDOR=$(curl -s --connect-timeout 30 ifconfig.me)
+        if [ -z "$END_SERVIDOR" ]; then
+    		echo -e "\e[31mFalha ao obter o IP externo: conexão expirou ou serviço indisponível.\e[0m"
+			echo -e "\e[31mObtenha o IP EXTERNO manualmente para substituir nas credenciais.\e[0m"
+    		# Você pode definir um valor padrão ou tomar outras ações, se necessário
+		else
+    		echo "IP externo identificado: $END_SERVIDOR"
+		fi
+        
+        echo ""
+        echo "Aguardando 10 segundos para prosseguir automaticamente..."
+		sleep 10
 fi
 
 echo " "
