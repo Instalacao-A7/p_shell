@@ -102,13 +102,16 @@ else
 fi
 
 echo " "
-echo "########################################################"
+echo "#########################################################"
 echo " "
-echo "Usuário: $user"
-echo "Senha: $password"
-echo "IP do Servidor: $END_SERVIDOR"
-echo "Nome da base: $CHINCHILA_DS_DATABASENAME" 
-echo "Protocolo: $idchamado"
+echo "USUÁRIO: $user"
+echo "SENHA: $password"
+echo "HOST: $END_SERVIDOR"
+echo "DATABASE: $CHINCHILA_DS_DATABASENAME" 
+echo "SGBD: PostgreSQL"
+echo "PORTA: 5432"
+echo "PROTOCOLO: $idchamado"
+echo ""
 echo "#########################################################"
 echo ""
 
