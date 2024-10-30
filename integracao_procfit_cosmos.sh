@@ -128,15 +128,18 @@ fi
 
 
 
-echo " "
+echo ""
 echo "#########################################################"
 echo "Acesso para PROCFIT_COSMOS"
-echo " "
-echo "Usuário: integracao_procfit_cosmos"
-echo "Senha: $password"
-echo "IP do Servidor: $END_SERVIDOR"
-echo "Nome da base: $CHINCHILA_DS_DATABASENAME" 
-echo "Protocolo: $idchamado"
+echo ""
+echo "USUÁRIO: integracao_procfit_cosmos"
+echo "SENHA: $password"
+echo "HOST: $END_SERVIDOR"
+echo "DATABASE: $CHINCHILA_DS_DATABASENAME" 
+echo "SGBD: PostgreSQL"
+echo "PORTA: 5432"
+echo "PROTOCOLO: $idchamado"
+echo ""
 echo "#########################################################"
 echo ""
 
