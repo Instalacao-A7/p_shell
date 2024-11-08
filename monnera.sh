@@ -30,7 +30,24 @@ DropRole="DROP ROLE IF EXISTS leitura_monnera;"
 CreateRole="CREATE ROLE leitura_monnera login password '$password' nosuperuser inherit nocreatedb nocreaterole connection limit 5;"
 
 GrantPermissions="GRANT USAGE ON SCHEMA public TO leitura_monnera;
---- CLASSIFICACAO
+
+
+QueryTeste="SELECT * FROM unidadenegocio LIMIT 1;"
+
+RevokeDrop="REVOKE ALL PRIVILEGES ON ALL TABLES IN SCHEMA public from leitura_monnera;
+REVOKE ALL PRIVILEGES ON SCHEMA public from leitura_monnera;
+DROP ROLE IF EXISTS leitura_monnera;"
+
+
+echo "Removendo a ROLE leitura_monnera se existir"
+psql -X -h $END_SERVIDOR -U postgres -d $CHINCHILA_DS_DATABASENAME --command="$RevokeDrop"
+
+echo " "
+
+echo "Criando ROLE leitura_monnera"
+psql -X -h $END_SERVIDOR -U postgres -d $CHINCHILA_DS_DATABASENAME --command="$CreateRole"
+
+echo " "
 
 CREATE OR REPLACE VIEW public.v_monnera_classificacao AS 
  SELECT classificacao.id,
@@ -48,7 +65,6 @@ GRANT ALL ON TABLE public.v_monnera_classificacao TO postgres;
 GRANT SELECT ON TABLE public.v_monnera_classificacao TO leitura_monnera;
 
 
---- ESTORNO
 
 CREATE OR REPLACE VIEW public.v_monnera_estorno AS 
  SELECT venda.id AS vendaid,
@@ -111,9 +127,6 @@ ALTER TABLE public.v_monnera_estorno
 GRANT ALL ON TABLE public.v_monnera_estorno TO chinchila;
 GRANT SELECT ON TABLE public.v_monnera_estorno TO leitura_monnera;
 
-
---- FABRICANTE
-
 CREATE OR REPLACE VIEW public.v_monnera_fabricante AS 
  SELECT fabricante.id AS codigo,
     pessoa.razaosocial AS razao_social,
@@ -126,9 +139,6 @@ ALTER TABLE public.v_monnera_fabricante
   OWNER TO chinchila;
 GRANT ALL ON TABLE public.v_monnera_fabricante TO chinchila;
 GRANT SELECT ON TABLE public.v_monnera_fabricante TO leitura_monnera;
-
-
---- FORNECEDOR
 
 CREATE OR REPLACE VIEW public.v_monnera_fornecedor AS 
  SELECT fornecedor.id AS codigo,
@@ -149,8 +159,6 @@ GRANT ALL ON TABLE public.v_monnera_fornecedor TO chinchila;
 GRANT SELECT ON TABLE public.v_monnera_fornecedor TO leitura_monnera;
 
 
---- GRUPO USUARIO
-
 CREATE OR REPLACE VIEW public.v_monnera_grupo_usuario AS 
  SELECT grupousuario.id,
     grupousuario.nome
@@ -160,8 +168,6 @@ ALTER TABLE public.v_monnera_grupo_usuario
   OWNER TO postgres;
 GRANT ALL ON TABLE public.v_monnera_grupo_usuario TO postgres;
 GRANT SELECT ON TABLE public.v_monnera_grupo_usuario TO leitura_monnera;
-
---- LOJA
 
 CREATE OR REPLACE VIEW public.v_monnera_loja AS 
  SELECT unidadenegocio.id,
@@ -180,7 +186,6 @@ ALTER TABLE public.v_monnera_loja
 GRANT ALL ON TABLE public.v_monnera_loja TO postgres;
 GRANT SELECT ON TABLE public.v_monnera_loja TO leitura_monnera;
 
---- PRODUTO
 
 CREATE OR REPLACE VIEW public.v_monnera_produtos AS 
  SELECT embalagem.id AS embalagemid,
@@ -214,8 +219,6 @@ GRANT ALL ON TABLE public.v_monnera_produtos TO chinchila;
 GRANT SELECT ON TABLE public.v_monnera_produtos TO leitura_monnera;
 
 
---- SAIDA
-
 CREATE OR REPLACE VIEW public.v_monnera_saida AS 
  SELECT DISTINCT venda.id AS vendaid,
     venda.datahorafechamento,
@@ -244,8 +247,6 @@ GRANT ALL ON TABLE public.v_monnera_saida TO postgres;
 GRANT SELECT ON TABLE public.v_monnera_saida TO leitura_monnera;
 
 
---- USUARIO
-
 CREATE OR REPLACE VIEW public.v_monnera_usuarios AS 
  SELECT DISTINCT usuario.id AS codigo,
     usuario.login,
@@ -273,25 +274,11 @@ ALTER TABLE public.v_monnera_usuarios
 GRANT ALL ON TABLE public.v_monnera_usuarios TO chinchila;
 GRANT SELECT ON TABLE public.v_monnera_usuarios TO leitura_monnera;"
 
-QueryTeste="SELECT * FROM unidadenegocio LIMIT 1;"
-
-RevokeDrop="REVOKE ALL PRIVILEGES ON ALL TABLES IN SCHEMA public from leitura_monnera;
-REVOKE ALL PRIVILEGES ON SCHEMA public from leitura_monnera;
-DROP ROLE IF EXISTS leitura_monnera;"
-
-
-echo "Removendo a ROLE leitura_monnera se existir"
-psql -X -h $END_SERVIDOR -U postgres -d $CHINCHILA_DS_DATABASENAME --command="$RevokeDrop"
-
-echo " "
-
-echo "Criando ROLE leitura_monnera"
-psql -X -h $END_SERVIDOR -U postgres -d $CHINCHILA_DS_DATABASENAME --command="$CreateRole"
-
 echo " "
 
 echo "Dando as devidas pemissões para a ROLE leitura_monnera"
 psql -X -h $END_SERVIDOR -U postgres -d $CHINCHILA_DS_DATABASENAME --command="$GrantPermissions"
+
 
 
  if [[ "$PG_VERSION" == "14" ]]; then
