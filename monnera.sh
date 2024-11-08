@@ -278,7 +278,7 @@ psql -X -h $END_SERVIDOR -U postgres -d $CHINCHILA_DS_DATABASENAME --command="$C
 echo " "
 
 echo "Criando Views $user"
-psgl -X -h $end_servidor -U $user -d $chinchila_ds_databasename --command ="$CreateViews"
+psgl -X -h $END_SERVIDOR -U postgres -d $CHINCHILA_DS_DATABASENAME --command="$CreateViews"
 
 echo " "
 
