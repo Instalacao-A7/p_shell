@@ -36,7 +36,7 @@ CreateRole="CREATE ROLE $user login password '$password' nosuperuser inherit noc
 
 GrantPermissions="GRANT SELECT ON ALL TABLES IN SCHEMA public TO $user;"
 
-"CREATE OR REPLACE VIEW public.v_monnera_classificacao AS 
+CreateViews="CREATE OR REPLACE VIEW public.v_monnera_classificacao AS 
  SELECT classificacao.id,
     classificacao.profundidade AS nivel,
     classificacao.nome,
@@ -49,11 +49,11 @@ GrantPermissions="GRANT SELECT ON ALL TABLES IN SCHEMA public TO $user;"
 ALTER TABLE public.v_monnera_classificacao
   OWNER TO postgres;
 GRANT ALL ON TABLE public.v_monnera_classificacao TO postgres;
-GRANT SELECT ON TABLE public.v_monnera_classificacao TO $user;
+GRANT SELECT ON TABLE public.v_monnera_classificacao TO $user;"
 
 
 
-CREATE OR REPLACE VIEW public.v_monnera_estorno AS 
+"CREATE OR REPLACE VIEW public.v_monnera_estorno AS 
  SELECT venda.id AS vendaid,
     venda.datahorafechamento,
     venda.coo,
@@ -112,9 +112,9 @@ UNION ALL
 ALTER TABLE public.v_monnera_estorno
   OWNER TO chinchila;
 GRANT ALL ON TABLE public.v_monnera_estorno TO chinchila;
-GRANT SELECT ON TABLE public.v_monnera_estorno TO $user;
+GRANT SELECT ON TABLE public.v_monnera_estorno TO $user;"
 
-CREATE OR REPLACE VIEW public.v_monnera_fabricante AS 
+"CREATE OR REPLACE VIEW public.v_monnera_fabricante AS 
  SELECT fabricante.id AS codigo,
     pessoa.razaosocial AS razao_social,
     pessoa.nome,
@@ -143,10 +143,10 @@ CREATE OR REPLACE VIEW public.v_monnera_fornecedor AS
 ALTER TABLE public.v_monnera_fornecedor
   OWNER TO chinchila;
 GRANT ALL ON TABLE public.v_monnera_fornecedor TO chinchila;
-GRANT SELECT ON TABLE public.v_monnera_fornecedor TO $user;
+GRANT SELECT ON TABLE public.v_monnera_fornecedor TO $user;"
 
 
-CREATE OR REPLACE VIEW public.v_monnera_grupo_usuario AS 
+"CREATE OR REPLACE VIEW public.v_monnera_grupo_usuario AS 
  SELECT grupousuario.id,
     grupousuario.nome
    FROM grupousuario;
@@ -154,9 +154,9 @@ CREATE OR REPLACE VIEW public.v_monnera_grupo_usuario AS
 ALTER TABLE public.v_monnera_grupo_usuario
   OWNER TO postgres;
 GRANT ALL ON TABLE public.v_monnera_grupo_usuario TO postgres;
-GRANT SELECT ON TABLE public.v_monnera_grupo_usuario TO $user;
+GRANT SELECT ON TABLE public.v_monnera_grupo_usuario TO $user;"
 
-CREATE OR REPLACE VIEW public.v_monnera_loja AS 
+"CREATE OR REPLACE VIEW public.v_monnera_loja AS 
  SELECT unidadenegocio.id,
     unidadenegocio.codigo,
     unidadenegocio.status,
@@ -171,10 +171,10 @@ CREATE OR REPLACE VIEW public.v_monnera_loja AS
 ALTER TABLE public.v_monnera_loja
   OWNER TO postgres;
 GRANT ALL ON TABLE public.v_monnera_loja TO postgres;
-GRANT SELECT ON TABLE public.v_monnera_loja TO $user;
+GRANT SELECT ON TABLE public.v_monnera_loja TO $user;"
 
 
-CREATE OR REPLACE VIEW public.v_monnera_produtos AS 
+"CREATE OR REPLACE VIEW public.v_monnera_produtos AS 
  SELECT embalagem.id AS embalagemid,
     produto.id AS produtoid,
     embalagem.descricao AS embalagem,
@@ -203,10 +203,10 @@ CREATE OR REPLACE VIEW public.v_monnera_produtos AS
 ALTER TABLE public.v_monnera_produtos
   OWNER TO chinchila;
 GRANT ALL ON TABLE public.v_monnera_produtos TO chinchila;
-GRANT SELECT ON TABLE public.v_monnera_produtos TO $user;
+GRANT SELECT ON TABLE public.v_monnera_produtos TO $user;"
 
 
-CREATE OR REPLACE VIEW public.v_monnera_saida AS 
+"CREATE OR REPLACE VIEW public.v_monnera_saida AS 
  SELECT DISTINCT venda.id AS vendaid,
     venda.datahorafechamento,
     venda.coo,
@@ -231,10 +231,10 @@ CREATE OR REPLACE VIEW public.v_monnera_saida AS
 ALTER TABLE public.v_monnera_saida
   OWNER TO postgres;
 GRANT ALL ON TABLE public.v_monnera_saida TO postgres;
-GRANT SELECT ON TABLE public.v_monnera_saida TO $user;
+GRANT SELECT ON TABLE public.v_monnera_saida TO $user;"
 
 
-CREATE OR REPLACE VIEW public.v_monnera_usuarios AS 
+"CREATE OR REPLACE VIEW public.v_monnera_usuarios AS 
  SELECT DISTINCT usuario.id AS codigo,
     usuario.login,
         CASE
@@ -277,6 +277,11 @@ psql -X -h $END_SERVIDOR -U postgres -d $CHINCHILA_DS_DATABASENAME --command="$C
 
 echo " "
 
+echo "Criando Views $user"
+psgl -X -h $end_servidor -U $user -d $chinchila_ds_databasename --command ="$CreateViews"
+
+echo " "
+
 echo "Dando as devidas pemissões para a ROLE $user"
 psql -X -h $END_SERVIDOR -U postgres -d $CHINCHILA_DS_DATABASENAME --command="$GrantPermissions"
 
@@ -296,7 +301,8 @@ psql -X -h $END_SERVIDOR -U postgres -d $CHINCHILA_DS_DATABASENAME --command="$G
 	echo ""
 	echo
 	echo ""
- fi			
+ fi		
+
 
 service postgresql-$PG_VERSION reload
 
