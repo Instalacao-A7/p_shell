@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
+# Exemplo de estrutura if no Shell script
+
+# Variável de exemplo
+TipoServidor=`hostname | cut -b 1-9`
 
 echo "########################################################"
 echo " 		    Iniciando Procedimentos                   "
@@ -9,15 +13,18 @@ read -s PGPASSWORD
 echo
 export PGPASSWORD
 
-echo -n "Digite ID chamado: "
+echo -n "Digite o código do chamado - GLPI: "
 read idchamado
-echo "Protocolo: $idchamado" | tee -a leitura_monnera.log
+echo "Protocolo: $idchamado" | tee -a leitura_bd.log
 
+echo -n "Digitar o usuário: "
+read  user
 
+echo -n "Digite uma senha MUITO FORTE para o usuário: "
+read  password
 echo ""
 echo ""
-echo -n "Digite uma senha MUITO FORTE para o usuário leitura_monnera:"
-read password
+
 
 source /etc/wildfly.conf
 
@@ -25,31 +32,11 @@ PG_DATA=$(ps aux | grep -oP '^postgres .*postmaster.*-D *\K.*')
 PG_VERSION=$(cat $PG_DATA/PG_VERSION)
 
 
-DropRole="DROP ROLE IF EXISTS leitura_monnera;"
+CreateRole="CREATE ROLE $user login password '$password' nosuperuser inherit nocreatedb nocreaterole connection limit 5;"
 
-CreateRole="CREATE ROLE leitura_monnera login password '$password' nosuperuser inherit nocreatedb nocreaterole connection limit 5;"
+GrantPermissions="GRANT SELECT ON ALL TABLES IN SCHEMA public TO $user;"
 
-GrantPermissions="GRANT USAGE ON SCHEMA public TO leitura_monnera;
-
-
-QueryTeste="SELECT * FROM unidadenegocio LIMIT 1;"
-
-RevokeDrop="REVOKE ALL PRIVILEGES ON ALL TABLES IN SCHEMA public from leitura_monnera;
-REVOKE ALL PRIVILEGES ON SCHEMA public from leitura_monnera;
-DROP ROLE IF EXISTS leitura_monnera;"
-
-
-echo "Removendo a ROLE leitura_monnera se existir"
-psql -X -h $END_SERVIDOR -U postgres -d $CHINCHILA_DS_DATABASENAME --command="$RevokeDrop"
-
-echo " "
-
-echo "Criando ROLE leitura_monnera"
-psql -X -h $END_SERVIDOR -U postgres -d $CHINCHILA_DS_DATABASENAME --command="$CreateRole"
-
-echo " "
-
-CREATE OR REPLACE VIEW public.v_monnera_classificacao AS 
+"CREATE OR REPLACE VIEW public.v_monnera_classificacao AS 
  SELECT classificacao.id,
     classificacao.profundidade AS nivel,
     classificacao.nome,
@@ -62,7 +49,7 @@ CREATE OR REPLACE VIEW public.v_monnera_classificacao AS
 ALTER TABLE public.v_monnera_classificacao
   OWNER TO postgres;
 GRANT ALL ON TABLE public.v_monnera_classificacao TO postgres;
-GRANT SELECT ON TABLE public.v_monnera_classificacao TO leitura_monnera;
+GRANT SELECT ON TABLE public.v_monnera_classificacao TO $user;
 
 
 
@@ -125,7 +112,7 @@ UNION ALL
 ALTER TABLE public.v_monnera_estorno
   OWNER TO chinchila;
 GRANT ALL ON TABLE public.v_monnera_estorno TO chinchila;
-GRANT SELECT ON TABLE public.v_monnera_estorno TO leitura_monnera;
+GRANT SELECT ON TABLE public.v_monnera_estorno TO $user;
 
 CREATE OR REPLACE VIEW public.v_monnera_fabricante AS 
  SELECT fabricante.id AS codigo,
@@ -138,7 +125,7 @@ CREATE OR REPLACE VIEW public.v_monnera_fabricante AS
 ALTER TABLE public.v_monnera_fabricante
   OWNER TO chinchila;
 GRANT ALL ON TABLE public.v_monnera_fabricante TO chinchila;
-GRANT SELECT ON TABLE public.v_monnera_fabricante TO leitura_monnera;
+GRANT SELECT ON TABLE public.v_monnera_fabricante TO $user;
 
 CREATE OR REPLACE VIEW public.v_monnera_fornecedor AS 
  SELECT fornecedor.id AS codigo,
@@ -156,7 +143,7 @@ CREATE OR REPLACE VIEW public.v_monnera_fornecedor AS
 ALTER TABLE public.v_monnera_fornecedor
   OWNER TO chinchila;
 GRANT ALL ON TABLE public.v_monnera_fornecedor TO chinchila;
-GRANT SELECT ON TABLE public.v_monnera_fornecedor TO leitura_monnera;
+GRANT SELECT ON TABLE public.v_monnera_fornecedor TO $user;
 
 
 CREATE OR REPLACE VIEW public.v_monnera_grupo_usuario AS 
@@ -167,7 +154,7 @@ CREATE OR REPLACE VIEW public.v_monnera_grupo_usuario AS
 ALTER TABLE public.v_monnera_grupo_usuario
   OWNER TO postgres;
 GRANT ALL ON TABLE public.v_monnera_grupo_usuario TO postgres;
-GRANT SELECT ON TABLE public.v_monnera_grupo_usuario TO leitura_monnera;
+GRANT SELECT ON TABLE public.v_monnera_grupo_usuario TO $user;
 
 CREATE OR REPLACE VIEW public.v_monnera_loja AS 
  SELECT unidadenegocio.id,
@@ -184,7 +171,7 @@ CREATE OR REPLACE VIEW public.v_monnera_loja AS
 ALTER TABLE public.v_monnera_loja
   OWNER TO postgres;
 GRANT ALL ON TABLE public.v_monnera_loja TO postgres;
-GRANT SELECT ON TABLE public.v_monnera_loja TO leitura_monnera;
+GRANT SELECT ON TABLE public.v_monnera_loja TO $user;
 
 
 CREATE OR REPLACE VIEW public.v_monnera_produtos AS 
@@ -216,7 +203,7 @@ CREATE OR REPLACE VIEW public.v_monnera_produtos AS
 ALTER TABLE public.v_monnera_produtos
   OWNER TO chinchila;
 GRANT ALL ON TABLE public.v_monnera_produtos TO chinchila;
-GRANT SELECT ON TABLE public.v_monnera_produtos TO leitura_monnera;
+GRANT SELECT ON TABLE public.v_monnera_produtos TO $user;
 
 
 CREATE OR REPLACE VIEW public.v_monnera_saida AS 
@@ -244,7 +231,7 @@ CREATE OR REPLACE VIEW public.v_monnera_saida AS
 ALTER TABLE public.v_monnera_saida
   OWNER TO postgres;
 GRANT ALL ON TABLE public.v_monnera_saida TO postgres;
-GRANT SELECT ON TABLE public.v_monnera_saida TO leitura_monnera;
+GRANT SELECT ON TABLE public.v_monnera_saida TO $user;
 
 
 CREATE OR REPLACE VIEW public.v_monnera_usuarios AS 
@@ -270,29 +257,42 @@ CREATE OR REPLACE VIEW public.v_monnera_usuarios AS
      LEFT JOIN usuarioparticipantegrupousuario ON usuarioparticipantegrupousuario.usuarioid = usuario.id;
 
 ALTER TABLE public.v_monnera_usuarios
-  OWNER TO chinchila;
+OWNER TO chinchila;
 GRANT ALL ON TABLE public.v_monnera_usuarios TO chinchila;
-GRANT SELECT ON TABLE public.v_monnera_usuarios TO leitura_monnera;"
+GRANT SELECT ON TABLE public.v_monnera_usuarios TO $user;"
+
+QueryTeste="SELECT * FROM unidadenegocio LIMIT 1;"
+
+RevokeDrop="REVOKE ALL PRIVILEGES ON ALL TABLES IN SCHEMA public from $user;
+DROP ROLE IF EXISTS $user;"
+
+
+echo "Removendo a ROLE $user se existir"
+psql -X -h $END_SERVIDOR -U postgres -d $CHINCHILA_DS_DATABASENAME --command="$RevokeDrop"
 
 echo " "
 
-echo "Dando as devidas pemissões para a ROLE leitura_monnera"
-psql -X -h $END_SERVIDOR -U postgres -d $CHINCHILA_DS_DATABASENAME --command="$GrantPermissions"
+echo "Criando ROLE $user"
+psql -X -h $END_SERVIDOR -U postgres -d $CHINCHILA_DS_DATABASENAME --command="$CreateRole"
 
+echo " "
+
+echo "Dando as devidas pemissões para a ROLE $user"
+psql -X -h $END_SERVIDOR -U postgres -d $CHINCHILA_DS_DATABASENAME --command="$GrantPermissions"
 
 
  if [[ "$PG_VERSION" == "14" ]]; then
 	cd /var/lib/pgsql/$PG_VERSION/data/
-	sed -i '/leitura_monnera/d' pg_hba.conf
-	echo "host	all		leitura_monnera	samenet			scram-sha-256" >> pg_hba.conf
+	sed -i "/$user/d" pg_hba.conf
+	echo "host	all		$user	samenet			scram-sha-256" >> pg_hba.conf
 	echo ""
 	echo
 	echo ""
    
  else
 	cd /var/lib/pgsql/$PG_VERSION/data/
-	sed -i '/leitura_monnera/d' pg_hba.conf
-	echo "host	all		leitura_monnera	samenet			md5" >> pg_hba.conf
+	sed -i "/$user/d" pg_hba.conf
+	echo "host	all		$user	samenet			md5" >> pg_hba.conf
 	echo ""
 	echo
 	echo ""
@@ -300,17 +300,48 @@ psql -X -h $END_SERVIDOR -U postgres -d $CHINCHILA_DS_DATABASENAME --command="$G
 
 service postgresql-$PG_VERSION reload
 
-psql -X -h $END_SERVIDOR -U "leitura_monnera" -d $CHINCHILA_DS_DATABASENAME --password --command="$QueryTeste"
+psql -X -h $END_SERVIDOR -U "$user" -d $CHINCHILA_DS_DATABASENAME --password --command="$QueryTeste"
+
+#/ Condição no if
+if [ $TipoServidor == "localhost" ]; then
+        echo "#######################################################"
+        echo ""
+        echo "O servidor dessa loja é físico, não é necessário "
+        echo "realizar a liberação do firewall."
+        echo "#######################################################"
+else
+        echo "#######################################################"
+        echo ""
+        echo "O servidor dessa loja é em nuvem, seguir os passos do  "
+        echo " 	  KB http://kb.a7.net.br/index.php?curid=9470"
+        echo "#######################################################"
+		echo ""
+        # Captura o IP externo da rede usando curl ifconfig.me
+        END_SERVIDOR=$(curl -s --connect-timeout 30 ifconfig.me)
+        if [ -z "$END_SERVIDOR" ]; then
+    		echo -e "\e[31mFalha ao obter o IP externo: conexão expirou ou serviço indisponível.\e[0m"
+			echo -e "\e[31mObtenha o IP EXTERNO manualmente para substituir nas credenciais.\e[0m"
+    		# Você pode definir um valor padrão ou tomar outras ações, se necessário
+		else
+    		echo "IP externo identificado: $END_SERVIDOR"
+		fi
+        
+        echo ""
+        echo "Aguardando 10 segundos para prosseguir automaticamente..."
+		sleep 10
+fi
 
 echo " "
-echo "########################################################"
-echo "Acesso para MONNERA"
+echo "#########################################################"
 echo " "
-echo "Usuário: leitura_monnera"
-echo "Senha: $password"
-echo "IP do Servidor: $END_SERVIDOR"
-echo "Nome da base: $CHINCHILA_DS_DATABASENAME" 
-echo "Protocolo: $idchamado"
+echo "USUÁRIO: $user"
+echo "SENHA: $password"
+echo "HOST: $END_SERVIDOR"
+echo "DATABASE: $CHINCHILA_DS_DATABASENAME" 
+echo "SGBD: PostgreSQL"
+echo "PORTA: 5432"
+echo "PROTOCOLO: $idchamado"
+echo ""
 echo "#########################################################"
 echo ""
 
@@ -328,7 +359,7 @@ echo
 	psql -X -h $END_SERVIDOR -U postgres -d $CHINCHILA_DS_DATABASENAME --command="$RevokeDrop"
 	echo
 	echo ""
-	sed -i '/leitura_monnera/d' pg_hba.conf
+	sed -i "/$user/d" pg_hba.conf
 	echo ""
 	echo ""
 	service postgresql-$PG_VERSION reload
@@ -344,4 +375,6 @@ echo
 	echo "                         OK                            "
 	echo "Copie os 'Dados de acesso' e encaminhe ao solicitante. "
 	echo "#######################################################"
+	echo ""
+	echo ""
  fi
